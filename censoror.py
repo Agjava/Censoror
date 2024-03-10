@@ -7,7 +7,7 @@ from google.cloud import language_v1
 import re
 
 # Download the spaCy large English model
-# spacy.cli.download("en_core_web_lg")
+spacy.cli.download("en_core_web_lg")
 
 
 # Function to filter out 4-digit numbers from the list
