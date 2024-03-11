@@ -19,12 +19,17 @@ Censoror is a command-line tool that employs natural language processing and reg
 - Pipenv (for managing dependencies)
 - Python 3.x
 
-## Installation and running
+## Running and Installing instruction
 
 1. Clone the repository:
 
    ```bash
    git clone https://github.com/your_username/Censoror.git
+   ```
+2. Navigate to the project directory:
+
+   ```bash
+   cd Censoror
    ```
 
 2. Install dependencies using Pipenv:
@@ -35,10 +40,10 @@ Censoror is a command-line tool that employs natural language processing and reg
 
 ## Usage
 
-### Basic Usage
+### Main line
 
 ```bash
-pipenv run python censoror.py --input '*.txt' --names --dates --phones --address --output 'files/' --stats stderr
+pipenv run python censoror.py --input './files/*.txt' --names --date --address --output 'docs/output' --stats stderr
 ```
 
 ### Options
@@ -47,21 +52,20 @@ pipenv run python censoror.py --input '*.txt' --names --dates --phones --address
 - `--output`: Specify the output directory for censored files.
 - `--names`: Enable censorship of names.
 - `--dates`: Enable censorship of dates.
-- `--phones`: Enable censorship of phone numbers.
 - `--address`: Enable censorship of addresses.
 - `--stats`: Choose statistics output destination (`stderr`, `stdout`, or a file path).
 
 ## Statistics Output
 
-Statistics are displayed based on the specified `--stats` option.
+Statistics are presented according to the selected `--stats` option.
 
-- If `stderr` is chosen, statistics are printed to the standard error.
-- If `stdout` is chosen, statistics are printed to the standard output.
-- If a file path is specified, statistics are saved to the specified file.
+- Choosing `stderr` will result in statistics being outputted to the standard error stream.
+- Selecting `stdout` means statistics will be displayed on the standard output stream.
+- If a file path is provided, statistics will be written to the indicated file.
 
 ## Known Issues
 
-- No known issues at the moment.
+- I have not figured out any bugs for now
 
 ## Assumptions
 
@@ -72,68 +76,66 @@ Statistics are displayed based on the specified `--stats` option.
 
 ## Function Description for - Fetch/Download, Parse/Extract, create, Populate/Insert, Status/Print
 
-### `redact_text(text, entities, replacement_char='█')`
+### `replace_with_blocks(text, entities)`
 
-This function takes the original text along with a list of entities to be redacted and replaces each occurrence of those entities with a specified replacement character (default is '█').
-It supports both string entities and SpaCy token entities.
+This function, `replace_with_blocks`, takes two arguments: `text`, which is a string, and `entities`, which is a list of substrings (presumably entities) to be replaced within the `text`. The function performs the following steps:
+1. It first calls another function, `filter_out_4_digit_numbers`, with the `entities` list as its argument. This suggests that `filter_out_4_digit_numbers` is intended to process the `entities` list and return a modified list where entities that are 4-digit numbers might be filtered out, although without the implementation of `filter_out_4_digit_numbers`, the exact behavior on 4-digit numbers is not clear.
+2. Then, for each entity in the filtered list (`ent`), it calculates a string (`full_block`) consisting of Unicode full block characters (`"\u2588"`). The length of this string of block characters matches the length of the entity it is replacing.
+3. It replaces all occurrences of each entity in the original `text` with the corresponding string of block characters. This effectively obscures or censors the entities in the text by replacing them with a visual block of the same length.
+4. Finally, the function returns the modified text where specified entities have been replaced with blocks.
 
-### `process_file(file_path, output_directory, stats)`
 
-This function reads a file specified by `file_path`, applies redaction to sensitive information, and saves the redacted content to an output file in the specified `output_directory`.
-It also updates the `stats` dictionary with information about the redaction process.
+### ` process_files(file_paths, output_dir)`
 
-### `generate_stats(stats, redacted_texts, stats_output)`
+The function `process_files` takes two arguments: `file_paths`, a list of file paths to be processed, and `output_dir`, the directory path where the processed files will be saved. It performs the following steps:
+1. Iterates through each file path in the `file_paths` list.
+2. For each file, it attempts to:
+   - Open and read the file's content.
+   - Process the text content to detect specific information (the exact nature of this information isn't detailed but is done by a function called `detect_information`) and replace it with full block characters, effectively censoring or obscuring the identified information.
+   - Generate a new file path for the censored output, appending ".censored" to the original file name and placing it in the specified `output_dir`.
+   - If the `output_dir` doesn't exist, it creates the directory.
+   - Write the modified (censored) text to the new output file.
+3. The function prints messages to indicate the processing status of each file and any errors encountered during the process.
 
-This function generates statistics based on the redaction process and writes them to an output file specified by `stats_output`.
-It includes the total number of processed files, counts of censored terms (names, dates, phones, addresses), and a list of censored files.
+### `print_stats(count)`
 
-### `main()`
+The function `print_stats` takes a single argument `count`, which is expected to be a list or tuple containing four numerical values. These values represent counts of different types of information that have been censored: names, addresses, dates, and phone numbers, in that order. 
+The function simply prints these counts to the console with descriptive labels for each type of censored information, providing a summary or statistics of the censorship performed. 
 
-The main function parses command-line arguments using the `argparse` module and executes the redaction process based on the specified options.
-It initializes the statistics dictionary, processes input files, and prints or saves the statistics based on the chosen output destination.
+### ` __name__ == "__main__"`
 
-### Additional Functions (in the `main()` function):
+In this block a CLI is set up using the `argparse` module to allow users to censor specific types of information (names, dates, phone numbers, addresses) in text files
 
-#### `install_requirements()`
+### Additional Functions (in the ` __name__ == "__main__"` function):
 
-This function is called during the script execution to ensure that required packages are installed using `pipenv`.
+1. It defines command-line arguments for the user to specify input file patterns (`--input`), an output directory (`--output`), and flags to indicate which types of information to censor (`--names`, `--dates`, `--phones`, `--address`). There is also an option (`--stats`) to choose where to output statistics (either `stdout` or `stderr`).
+2. It checks if the `--input` argument is provided. If not, it prompts the user to provide input files using the `--input` flag.
+3. It uses the provided glob patterns (from `--input`) to find matching text files within the current directory and stores their paths in a list.
+4. It checks if any files were found with the specified patterns. If no files are found, it notifies the user.
+5. It creates the specified output directory (`--output`) if it doesn't already exist.
+6. It processes the found text files based on the specified censor flags (`--names`, `--dates`, `--phones`, `--address`). This involves reading each file, censoring the specified types of information, and saving the modified content to new files in the output directory.
+7. The script requires at least one censor flag to be specified; otherwise, it prompts the user to specify at least one.
 
-#### `print_statistics(stats)`
-
-This function prints the statistics to standard error if `stderr` is chosen as the output destination for statistics.
-
-#### `write_statistics(stats, stats_output)`
-
-This function writes the statistics to the specified output file if a file path is provided as the output destination for statistics.
-
-#### `create_output_directory(output_directory)`
-
-This function ensures that the specified output directory exists. If not, it creates the directory.
+In short, this script provides a tool for automatically censoring specified types of sensitive information in text files, based on user-defined criteria, and saving the censored versions to a designated output directory.
 
 ## Test Cases Description -
-1. `test_phones.py` - The `test_phone_numbers_censored` function is a Pytest test designed to verify the correct functioning
-of the phone number redaction feature in the `process_file` function. The test sets up temporary input and
-output directories, creating a sample input file containing two phone numbers. The `process_file` function
-is then invoked on this input, and the resulting output file is examined to ensure that the original phone numbers
-have been successfully redacted, as indicated by the absence of the numeric sequences and their replacement with '█'.
 
-2. `test_names.py` - The `test_names_censored` function is a Pytest test designed to validate the correct operation of
-the name redaction feature within the `process_file` function. Similar to the previous test, it sets up temporary input
-and output directories, creating a sample input file containing two names. The `process_file` function is then called
-with this input, and the resulting output file is examined to ensure that the original names have been successfully redacted.
-The test checks for the absence of the specified names in the redacted text, confirming that the censoring mechanism for names
-is functioning as expected.
+The test case file is presumably designed to analyze text content and extract specific entities based on their types, such as names, dates, phone numbers, etc. The tests are written using the `unittest` framework, and `Mock` objects from the `unittest.mock` module are used to simulate the behavior of external dependencies (e.g., an NLP library) without requiring actual implementation details. Let's break down each function and explain what they do:
 
-3. `test_dates.py` -
-The `test_dates_censored` function is a Pytest test designed to verify the correct functionality of the date redaction
-feature within the `process_file` function. This test follows a similar structure to the previous tests. It sets up temporary
-input and output directories, creates a sample input file containing two dates, and then calls the `process_file` function.
-The resulting output file is examined to ensure that the original dates have been successfully redacted.
+### `test_analyze_entities_name(self)`
+- This test case checks if the `analyze_entities` function correctly identifies and extracts name entities from the provided text content. It uses `Mock` objects to simulate two entities labeled as "PERSON" (John Doe and Jane Smith) and checks if the function correctly returns these names as expected entities. The test passes if the function's output matches the list of expected entities (`["John Doe", "Jane Smith"]`).
 
-4. `test_phones.py` -
-The `test_phone_numbers_censored` function is a Pytest test designed to validate the correct functionality of the phone
-number redaction feature within the `process_file` function. This test, like the previous ones, uses Pytest fixtures to set
-up temporary input and output directories, and it creates a sample input file containing two phone numbers. The `process_file`
-function is then called, and the resulting output file is examined to ensure that the original phone numbers have been
-successfully redacted.
+### `test_empty_input(self)`
+- This test case verifies the behavior of the `analyze_entities` function when it is given an empty string as input. The expected behavior is that the function should return an empty list, indicating that no entities were found in the text. The test passes if the function's output is an empty list.
+
+### `test_no_entities(self)`
+- This test case checks how the `analyze_entities` function handles input text that does not contain any relevant entities. For example, the sentence "The quick brown fox jumps over the lazy dog." does not include any names, dates, phone numbers, etc. The expected output is an empty list, and the test passes if the function returns an empty list, indicating no entities were found.
+
+### `test_entities(self)`
+- This test case is designed to evaluate the `analyze_entities` function's ability to identify and extract a mix of relevant and irrelevant entities from the provided text content. The text includes a date, an address, and a phone number. The test checks if the function correctly returns these entities while ignoring irrelevant information. The expected output is a list of the relevant entities (`["352-378-4990", "2024-03-15 at 2:30 PM.", "4000 SW 37th BLVD"]`), and the test passes if the actual output matches this expectation.
+
+### `if __name__ == '__main__': unittest.main()`
+- This line is the entry point for running the tests when the script is executed directly. `unittest.main()` provides a command-line interface for running the tests in the script. When this script is executed, it automatically runs all the test cases defined in the class `TestAnalyzeEntities`.
+
+
 
