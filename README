@@ -2,22 +2,22 @@
 ## Author
 Anvesh Gupta
 
-## Overview
+## Description
 
-Censoror is a command-line utility designed to redact sensitive information in plain text documents. It utilizes natural language processing and regular expressions to identify and censor names, dates, phone numbers, and addresses in the specified input files.
+Censoror is a command-line tool that employs natural language processing and regular expressions to detect and redact confidential data in plain text files. It is capable of obscuring personal details such as names, dates, phone numbers, and addresses within the provided documents.
 
 ## Features
 
-- Redacts names, dates, phone numbers, and addresses in plain text documents.
-- Supports input files specified using glob patterns.
-- Provides statistics on the censorship process.
-- Allows customization of redaction types (names, dates, phones, addresses).
-- Outputs redacted files to a specified directory.
+- Conceals identities, chronological data, contact numbers, and locations in text-based documents.
+- Accepts input files designated through glob patterns.
+- Offers insights into the redaction process.
+- Enables the tailoring of redaction categories (identities, chronological data, contact details, locations).
+- Directs the output of sanitized files to a chosen folder.
 
 ## Requirements
 
-- Python 3.x
 - Pipenv (for managing dependencies)
+- Python 3.x
 
 ## Installation and running
 
@@ -27,13 +27,7 @@ Censoror is a command-line utility designed to redact sensitive information in p
    git clone https://github.com/your_username/Censoror.git
    ```
 
-2. Navigate to the project directory:
-
-   ```bash
-   cd Censoror
-   ```
-
-3. Install dependencies using Pipenv:
+2. Install dependencies using Pipenv:
 
    ```bash
    pipenv install
